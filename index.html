@@ -1,11 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>XMind Visualization</title>
+<meta charset="UTF-8">
+<title>XMind Visualization</title>
+<style>
+  .zoom-container {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 80vh; /* Adjust based on your preference */
+  }
+  .zoom-image {
+    width: 100%;
+    transition: transform 0.25s ease;
+    cursor: pointer;
+    transform-origin: center center;
+  }
+</style>
 </head>
 <body>
-    <h1>View My XMind Map</h1>
-    <img src="mindmap.jpg" alt="XMind Map">
-    <!-- Or embed other content -->
+<h1>View My XMind Map</h1>
+<div class="zoom-container" id="zoom-container">
+    <img src="mindmap.jpg" alt="XMind Map" id="zoom-image" class="zoom-image">
+</div>
+
+<script>
+let scale = 1;
+const el = document.getElementById('zoom-image');
+const container = document.getElementById('zoom-container');
+
+container.onwheel = function(event) {
+    event.preventDefault();
+    scale += event.deltaY * -0.01;
+    // Restrict scale
+    scale = Math.min(Math.max(.125, scale), 4);
+    // Apply scale transform
+    el.style.transform = `scale(${scale})`;
+};
+
+let posX = 0, posY = 0, canMove = false;
+
+container.onmousedown = function(event) {
+    canMove = true;
+    posX = event.clientX;
+    posY = event.clientY;
+    document.onmouseup = function() {
+        canMove = false;
+    };
+    document.onmousemove = function(event) {
+        if (canMove) {
+            let dx = event.clientX - posX;
+            let dy = event.clientY - posY;
+            const { left, top } = el.getBoundingClientRect();
+            el.style.left = left + dx + "px";
+            el.style.top = top + dy + "px";
+            posX = event.clientX;
+            posY = event.clientY;
+        }
+    };
+};
+
+el.addEventListener('dblclick', function() {
+    scale = 1; // Reset scale to default
+    el.style.transform = `scale(${scale})`;
+    el.style.left = "0px";
+    el.style.top = "0px";
+});
+</script>
+
 </body>
 </html>
