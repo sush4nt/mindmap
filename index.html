@@ -7,65 +7,77 @@
   .zoom-container {
     overflow: hidden;
     position: relative;
-    width: 100%;
-    height: 80vh; /* Adjust based on your preference */
+    width: 100%; /* Full width of the container */
+    height: 80vh; /* 80% of the viewport height */
   }
   .zoom-image {
-    width: 100%;
+    position: absolute; /* Positioned absolutely to be moved freely */
+    width: auto; /* Maintain original image dimensions */
+    max-width: none; /* Ensure we're not restricting the size */
     transition: transform 0.25s ease;
-    cursor: pointer;
-    transform-origin: center center;
+    cursor: grab;
   }
 </style>
 </head>
 <body>
 <h1>View My XMind Map</h1>
-<div class="zoom-container" id="zoom-container">
-    <img src="mindmap.jpg" alt="XMind Map" id="zoom-image" class="zoom-image">
+<div class="zoom-container">
+    <img src="path_to_your_image.png" alt="XMind Map" id="zoom-image" class="zoom-image">
 </div>
 
 <script>
 let scale = 1;
 const el = document.getElementById('zoom-image');
-const container = document.getElementById('zoom-container');
+const container = document.querySelector('.zoom-container');
 
 container.onwheel = function(event) {
     event.preventDefault();
     scale += event.deltaY * -0.01;
     // Restrict scale
-    scale = Math.min(Math.max(.125, scale), 4);
+    scale = Math.min(Math.max(0.1, scale), 4); // Minimum 10% zoom, Maximum 400%
     // Apply scale transform
     el.style.transform = `scale(${scale})`;
 };
 
-let posX = 0, posY = 0, canMove = false;
+let pos = { top: 0, left: 0, x: 0, y: 0 };
 
-container.onmousedown = function(event) {
-    canMove = true;
-    posX = event.clientX;
-    posY = event.clientY;
-    document.onmouseup = function() {
-        canMove = false;
+const mouseDownHandler = function(e) {
+    el.style.cursor = 'grabbing';
+    el.style.userSelect = 'none';
+
+    pos = {
+        // The current scroll 
+        left: el.offsetLeft,
+        top: el.offsetTop,
+        // Get the current mouse position
+        x: e.clientX,
+        y: e.clientY,
     };
-    document.onmousemove = function(event) {
-        if (canMove) {
-            let dx = event.clientX - posX;
-            let dy = event.clientY - posY;
-            const { left, top } = el.getBoundingClientRect();
-            el.style.left = left + dx + "px";
-            el.style.top = top + dy + "px";
-            posX = event.clientX;
-            posY = event.clientY;
-        }
-    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
 };
 
-el.addEventListener('dblclick', function() {
-    scale = 1; // Reset scale to default
-    el.style.transform = `scale(${scale})`;
-    el.style.left = "0px";
-    el.style.top = "0px";
-});
+const mouseMoveHandler = function(e) {
+    // How far the mouse has been moved
+    const dx = e.clientX - pos.x;
+    const dy = e.clientY - pos.y;
+
+    // Set the position of element
+    el.style.left = `${pos.left + dx}px`;
+    el.style.top = `${pos.top + dy}px`;
+};
+
+const mouseUpHandler = function() {
+    el.style.cursor = 'grab';
+    el.style.removeProperty('user-select');
+
+    document.removeEventListener('mousemove', mouseMoveHandler);
+    document.removeEventListener('mouseup', mouseUpHandler);
+};
+
+// Attach the handler
+el.addEventListener('mousedown', mouseDownHandler);
 </script>
 
 </body>
