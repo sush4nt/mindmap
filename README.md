@@ -1,2 +1,2 @@
 # mindmap
-A mindmap palace to trace machine learning topics
+A mindmap to trace machine learning topics
