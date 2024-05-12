@@ -1,2 +1,2 @@
 # mindmap
-A mindmap to trace machine learning topics
+A mindmap to trace machine learning topics by categorizing them.
